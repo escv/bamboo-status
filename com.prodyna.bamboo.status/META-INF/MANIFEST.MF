@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Bamboo-Status
+Bundle-SymbolicName: com.prodyna.bamboo.status;singleton:=true
+Bundle-Version: 0.0.1
+Bundle-Activator: com.prodyna.bamboo.status.Activator
+Bundle-Vendor: PRODYNA
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.equinox.security;bundle-version="1.0.200"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
