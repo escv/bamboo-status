@@ -59,7 +59,7 @@ public class PlanStatusView extends ViewPart {
 		parent.setBackground(parent.getShell().getDisplay().getSystemColor(SWT.COLOR_GREEN));
 		if (scanTask == null) {
 			scanTask = new ScanTask(parent);
-			Activator.getDefault().getTimer().schedule(scanTask, 0, 1*60*1000);
+			Activator.getDefault().getTimer().schedule(scanTask, 0, 3*60*1000);
 		}
 	}
 

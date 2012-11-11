@@ -61,7 +61,7 @@ public class ScanTask extends TimerTask {
 					// if so, bypass this failure
 					if (excludedPlans != null) {
 						for (String excluded : excludedPlans) {
-							if (e.getKey().contains(excluded)) {
+							if (e.getKey().toUpperCase().contains(excluded.toUpperCase())) {
 								continue outer;
 							}
 						}

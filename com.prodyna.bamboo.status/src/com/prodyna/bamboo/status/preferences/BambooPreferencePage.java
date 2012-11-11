@@ -8,12 +8,12 @@
  *******************************************************************************/
 package com.prodyna.bamboo.status.preferences;
 
-import org.eclipse.jface.preference.*;
+import org.eclipse.jface.preference.FieldEditorPreferencePage;
+import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.views.IViewDescriptor;
 
 import com.prodyna.bamboo.status.Activator;
 import com.prodyna.bamboo.status.views.PlanStatusView;
@@ -56,6 +56,7 @@ public class BambooPreferencePage
 		host.setEmptyStringAllowed(false);
 		username.setEmptyStringAllowed(false);
 		password.setEmptyStringAllowed(false);
+		password.getTextControl(getFieldEditorParent()).setEchoChar('*');
 		
 		addField(host);
 		addField(username);
