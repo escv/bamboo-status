@@ -9,7 +9,9 @@
 package com.prodyna.bamboo.status.preferences;
 
 import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -20,6 +22,10 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ListViewer;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -29,11 +35,11 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.List;
 
 import com.prodyna.bamboo.status.Activator;
 import com.prodyna.bamboo.status.connect.BambooResourceLoader;
 import com.prodyna.bamboo.status.connect.IResourceLoader;
+import com.prodyna.bamboo.status.model.Project;
 import com.prodyna.bamboo.status.scan.BambooProjectResultHandler;
 
 /**
@@ -52,7 +58,7 @@ public class ProjectFieldEditor extends FieldEditor {
      * The list widget; <code>null</code> if none
      * (before creation or after disposal).
      */
-    private List list;
+    private ListViewer projects;
 	private Composite listButtonComposite;
     
     /**
@@ -100,11 +106,13 @@ public class ProjectFieldEditor extends FieldEditor {
         listButtonComposite.setLayout(layout);
 
         createPushButton(listButtonComposite, "Refresh Projects");
-        list = getListControl(listButtonComposite);
-        gd = new GridData(GridData.FILL_HORIZONTAL);
-        gd.grabExcessHorizontalSpace = true;
-        gd.heightHint = 150;
-        list.setLayoutData(gd);
+        projects = getProjectsListViewer(listButtonComposite);
+        //list = getListControl(listButtonComposite);
+        //gd = new GridData(GridData.FILL_HORIZONTAL);
+        //gd.grabExcessHorizontalSpace = true;
+        //gd.heightHint = 150;
+        
+        //projects.getControl().setLayoutData(gd);
         
 	}
 
@@ -113,8 +121,8 @@ public class ProjectFieldEditor extends FieldEditor {
 	 */
 	@Override
 	protected void doLoad() {
-		if (list != null) {
-			list.removeAll();
+		if (projects != null) {
+			
 			String username = usernameField.getStringValue();
 			String password = passwordField.getStringValue();
 			
@@ -135,13 +143,17 @@ public class ProjectFieldEditor extends FieldEditor {
 				SAXParserFactory spf = SAXParserFactory.newInstance();
 				SAXParser parser = spf.newSAXParser();
 				parser.parse(new ByteArrayInputStream(projectsXML.getBytes()), projectParserHandler);
-				Collection<String> bambooProjects = projectParserHandler.getProjectResults();
-				for (String bambooProject : bambooProjects) {
-					list.add(bambooProject);
-				}
+				java.util.List<Project> bambooProjects = projectParserHandler.getProjectResults();
+				projects.setInput(bambooProjects);
+
 				String savedSelection = getPreferenceStore().getString(getPreferenceName());
-				list.setSelection(savedSelection.split(","));
-				//list.selectAll();
+				String[] selectedProjects = savedSelection.split(",");
+				Collection<Project> newSelection = new ArrayList<Project>();
+				for (String selected : selectedProjects) {
+					newSelection.add(new Project(selected,""));
+				}
+				StructuredSelection selection = new StructuredSelection(newSelection);
+				projects.setSelection(selection);
 			} catch (final Exception e) {
 				Activator.getDefault().log(Status.ERROR, "Error while loading Bamboo Project list", e);
 				getPage().getShell().getDisplay().asyncExec(new Runnable() {
@@ -164,26 +176,22 @@ public class ProjectFieldEditor extends FieldEditor {
 
 	}
 	
-	/**
-     * Returns this field editor's list control.
-     *
-     * @param parent the parent control
-     * @return the list control
-     */
-    public List getListControl(Composite parent) {
-        if (list == null) {
-            list = new List(parent, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL
-                    | SWT.H_SCROLL);
-            list.setFont(parent.getFont());
-            list.addDisposeListener(new DisposeListener() {
+    public ListViewer getProjectsListViewer(Composite parent) {
+        if (projects == null) {
+        	projects = new ListViewer(parent);
+        	projects.setContentProvider(new ProjectContentProvider());
+        	projects.setLabelProvider(new ProjectLabelProvider());
+        	
+        	projects.getControl().setFont(parent.getFont());
+        	projects.getControl().addDisposeListener(new DisposeListener() {
                 public void widgetDisposed(DisposeEvent event) {
-                    list = null;
+                	projects = null;
                 }
             });
         } else {
-            checkParent(list, parent);
+            checkParent(projects.getControl(), parent);
         }
-        return list;
+        return projects;
     }
     
     private Button createPushButton(Composite parent, String key) {
@@ -215,19 +223,25 @@ public class ProjectFieldEditor extends FieldEditor {
 	 */
 	@Override
 	protected void doStore() {
-		if (list!=null) {
+		if (projects!=null) {
 			StringBuilder selectedProjects = new StringBuilder();
 			boolean first = true;
-			String[] selection = list.getSelection();
-			for (String selectItem : selection) {
-				if (!first) {
-					selectedProjects.append(",");
-				} else {
-					first = false;
+			ISelection selection = projects.getSelection();
+			if (selection instanceof IStructuredSelection) {
+				Iterator<?> iter = ((IStructuredSelection)selection).iterator();
+				while(iter.hasNext()){
+					Object cur = iter.next();
+					if (cur instanceof Project) {
+						if (!first) {
+							selectedProjects.append(",");
+						} else {
+							first = false;
+						}
+						selectedProjects.append(((Project)cur).getKey());
+					}
 				}
-				selectedProjects.append(selectItem);
+				getPreferenceStore().setValue(getPreferenceName(), selectedProjects.toString());
 			}
-			getPreferenceStore().setValue(getPreferenceName(), selectedProjects.toString());
 		}
 	}
 
