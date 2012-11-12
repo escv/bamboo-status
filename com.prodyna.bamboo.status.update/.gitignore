@@ -1,8 +1,8 @@
 bin
 .settings
 .DS_Store
-features
-plugins
+features/*
+plugins/*
 artifacts.jar
 content.jar
 
