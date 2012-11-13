@@ -108,11 +108,11 @@ public class ProjectFieldEditor extends FieldEditor {
         createPushButton(listButtonComposite, "Refresh Projects");
         projects = getProjectsListViewer(listButtonComposite);
         //list = getListControl(listButtonComposite);
-        //gd = new GridData(GridData.FILL_HORIZONTAL);
-        //gd.grabExcessHorizontalSpace = true;
-        //gd.heightHint = 150;
+        gd = new GridData(GridData.FILL_HORIZONTAL);
+        gd.grabExcessHorizontalSpace = true;
+        gd.heightHint = 150;
         
-        //projects.getControl().setLayoutData(gd);
+        projects.getControl().setLayoutData(gd);
         
 	}
 
@@ -146,9 +146,10 @@ public class ProjectFieldEditor extends FieldEditor {
 				java.util.List<Project> bambooProjects = projectParserHandler.getProjectResults();
 				projects.setInput(bambooProjects);
 
+				// preselect saved values
 				String savedSelection = getPreferenceStore().getString(getPreferenceName());
 				String[] selectedProjects = savedSelection.split(",");
-				Collection<Project> newSelection = new ArrayList<Project>();
+				java.util.List<Project> newSelection = new ArrayList<Project>();
 				for (String selected : selectedProjects) {
 					newSelection.add(new Project(selected,""));
 				}
