@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/com.prodyna.bamboo.status.feature_0.0.1.jar" id="com.prodyna.bamboo.status.feature" version="0.0.1">
+   <feature url="features/com.prodyna.bamboo.status.feature_0.0.2.jar" id="com.prodyna.bamboo.status.feature" version="0.0.2">
       <category name="bamboo-status"/>
    </feature>
    <category-def name="bamboo-status" label="Bamboo Status"/>

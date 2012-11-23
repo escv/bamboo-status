@@ -9,9 +9,7 @@
 package com.prodyna.bamboo.status.connect;
 
 import java.io.InputStream;
-import java.net.Authenticator;
 import java.net.HttpURLConnection;
-import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -23,6 +21,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import org.eclipse.core.runtime.Status;
+import org.eclipse.equinox.security.storage.EncodingUtils;
 
 import com.prodyna.bamboo.status.Activator;
 import com.prodyna.bamboo.status.preferences.PreferenceConstants;
@@ -34,7 +33,6 @@ import com.prodyna.bamboo.status.preferences.PreferenceConstants;
 public class BambooResourceLoader implements IResourceLoader {
 
 	private static final String BAMBOO_REST_API_PATH = "/rest/api/latest/";
-	private SSLSocketFactory factory;
 	
 	@Override
 	public String load(String path) throws ResourceLoadException {
@@ -59,7 +57,7 @@ public class BambooResourceLoader implements IResourceLoader {
 			baseUrl = baseUrl.substring(0, baseUrl.length()-1);
 		}
 
-		//String userpass = username + ":" + password;
+		String userpass = username + ":" + password;
 		
 		StringBuilder result = new StringBuilder();
 		HttpURLConnection conn = null;
@@ -68,25 +66,19 @@ public class BambooResourceLoader implements IResourceLoader {
 			try {
 				URL url = new URL(baseUrl);
 		        conn = (HttpURLConnection) url.openConnection();
-		        //String basicAuth = "Basic " + EncodingUtils.encodeBase64(userpass.getBytes());
-		        //conn.setRequestProperty ("Authorization", basicAuth);
+		        String basicAuth = "Basic " + EncodingUtils.encodeBase64(userpass.getBytes());
+		        conn.setRequestProperty ("Authorization", basicAuth);
 		        conn.setDoOutput(true);
-		        Authenticator.setDefault (new Authenticator() {
-		            protected PasswordAuthentication getPasswordAuthentication() {
-		                return new PasswordAuthentication (username, password.toCharArray());
-		            }
-		        });
+
 		        if (conn instanceof HttpsURLConnection) {
-		        	if (factory == null) {
-		        		try {
-		        			SSLContext ssl = SSLContext.getInstance("TLSv1");
-		        		    ssl.init(null, new TrustManager[]{new BypassX509TrustManager()}, null);
-		        		    factory = ssl.getSocketFactory();
-		        		    ((HttpsURLConnection) conn).setSSLSocketFactory(factory);
-		        		} catch(Exception e) {
-		        			Activator.getDefault().log(Status.ERROR, "Could not init tls https handling", e);
-		        		}
-		        	}
+	        		try {
+	        			SSLContext ssl = SSLContext.getInstance("TLSv1");
+	        		    ssl.init(null, new TrustManager[]{new BypassX509TrustManager()}, null);
+	        		    SSLSocketFactory factory = ssl.getSocketFactory();
+	        		    ((HttpsURLConnection) conn).setSSLSocketFactory(factory);
+	        		} catch(Exception e) {
+	        			Activator.getDefault().log(Status.ERROR, "Could not init tls https handling", e);
+	        		}
 		        }
 		        conn.connect();
 

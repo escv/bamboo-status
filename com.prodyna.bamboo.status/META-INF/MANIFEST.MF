@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Bamboo-Status
 Bundle-SymbolicName: com.prodyna.bamboo.status;singleton:=true
-Bundle-Version: 0.0.1
+Bundle-Version: 0.0.2
 Bundle-Activator: com.prodyna.bamboo.status.Activator
 Bundle-Vendor: PRODYNA
 Require-Bundle: org.eclipse.ui,

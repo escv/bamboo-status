@@ -10,7 +10,6 @@ package com.prodyna.bamboo.status.preferences;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 
 import javax.xml.parsers.SAXParser;
